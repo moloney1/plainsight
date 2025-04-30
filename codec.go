@@ -11,33 +11,10 @@ import (
 	"strings"
 )
 
-const inputFile = "test_img.png"
-const outputFile = "output.png"
 const bitsPerByte = 8
 
-func main() {
-
-	img, err := readImage(inputFile)
-	if err != nil {
-		panic(err)
-	}
-
-	if err = writeMessageToImage("Hello World!", img, outputFile); err != nil {
-		panic(err)
-	}
-
-	img, err = readImage(outputFile)
-
-	decodedMessage, err := readMessageFromImage(*img, 12)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("Read following message from %s: '%s'", outputFile, decodedMessage)
-
-}
-
 // read image from 'filename' and decode to PNG, convert from image.RGBA to image.NRGBA if necessary
-func readImage(filename string) (*image.NRGBA, error) {
+func ReadImage(filename string) (*image.NRGBA, error) {
 	imgFile, err := os.Open(filename)
 	if err != nil {
 		return &image.NRGBA{}, err
@@ -111,7 +88,7 @@ func decodeMessage(message string) string {
 }
 
 // Read the bits up to bytesToRead, return them decoded to plaintext
-func readMessageFromImage(img image.NRGBA, bytesToRead int) (string, error) {
+func ReadMessageFromImage(img image.NRGBA, bytesToRead int) (string, error) {
 	var builder strings.Builder
 
 	for i := range bitsPerByte * bytesToRead {
@@ -124,7 +101,7 @@ func readMessageFromImage(img image.NRGBA, bytesToRead int) (string, error) {
 }
 
 // Encode message to binary and write it to the image (from pixel 0) via LSB steganography
-func writeMessageToImage(message string, img *image.NRGBA, outputFilename string) error {
+func WriteMessageToImage(message string, img *image.NRGBA, outputFilename string) error {
 	messageBin := encodeMessage(message)
 
 	for i := range len(messageBin) {

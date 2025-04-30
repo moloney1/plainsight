@@ -48,8 +48,8 @@ func ReadMessage(bytes []byte, bytesToRead int) (string, error) {
 	return decodeMessage(builder.String()), nil
 }
 
-// Encode message to binary and write it to the image struct (from pixel 0) via LSB steganography
-func WriteMessage(message string, bytes []byte) {
+// Encode message to binary and write it to the byte slice (from byte 0) via LSB steganography, return modified byte slice
+func WriteMessage(message string, bytes []byte) []byte {
 	messageBin := encodeMessage(message)
 
 	for i := range len(messageBin) {
@@ -62,4 +62,5 @@ func WriteMessage(message string, bytes []byte) {
 			bytes[i] = bytes[i] | 1 // | 1 sets LSB to 1
 		}
 	}
+	return bytes
 }

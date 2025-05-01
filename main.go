@@ -8,7 +8,6 @@ const outputFile = "output.png"
 func main() {
 	// testCodec()
 	testTable()
-
 }
 
 func testTable() {
@@ -28,11 +27,16 @@ func testTable() {
 	WriteImageFile(outputFile, img)
 
 	newImg, _ := ReadImage(outputFile)
-	decodedMessage, err := ReadMessage(newImg.Pix, 44)
+	// decodedMessage, err := ReadMessage(newImg.Pix, 44)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Printf("Read following message from %s: '%s'", outputFile, decodedMessage)
+	newT, err := TableFromBytes(newImg.Pix)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("Read following message from %s: '%s'", outputFile, decodedMessage)
+	fmt.Println(newT.Meta)
 
 }
 

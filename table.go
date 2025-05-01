@@ -2,10 +2,15 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 )
 
 const metaSizeBytes = 512
 const bucketSizeBytes = 1024
+
+const openCurlyBrace = 123
+const closeCurlyBrace = 125
 
 type metadata struct {
 	Cap  int      `json:"cap"`
@@ -29,7 +34,7 @@ func NewTable(bytes []uint8) *Table {
 
 	t := Table{
 		Meta: m,
-		Data: bytes, // should it be bytes[m.Cap:] ?
+		Data: bytes,
 	}
 
 	t.commitMetadata()
@@ -38,13 +43,47 @@ func NewTable(bytes []uint8) *Table {
 }
 
 // Return a previously populated Table
-func TableFromBytes(bytes []uint8) {}
+func TableFromBytes(bytes []uint8) (*Table, error) {
+
+	firstChar, err := ReadMessage(bytes[:bitsPerByte], 1)
+	if err != nil {
+		panic(err)
+	}
+
+	if firstChar != fmt.Sprintf("%c", openCurlyBrace) {
+		return &Table{}, errors.New("no data found")
+	}
+
+	meta := metadata{}
+
+	for i := bitsPerByte; i < metaSizeBytes; i += bitsPerByte { // TODO find somewhere else for bitsPerByte const // TODO bounds?
+		char, err := ReadMessage(bytes[i:i+bitsPerByte], 1)
+		if err != nil {
+			return &Table{}, err
+		}
+		if char == fmt.Sprintf("%c", closeCurlyBrace) {
+
+			jsonString, err := ReadMessage(bytes[:i+bitsPerByte], (i+bitsPerByte)/bitsPerByte)
+			if err != nil {
+				panic(err)
+			}
+
+			err = json.Unmarshal([]byte(jsonString), &meta)
+			if err == nil {
+				return &Table{
+					Meta: meta,
+					Data: bytes,
+				}, nil
+			}
+		}
+	}
+	return &Table{}, errors.New("data invalid")
+}
 
 func (t *Table) commitMetadata() {
 	md, err := json.Marshal(t.Meta)
 	if err != nil {
 		panic(err)
 	}
-	// fmt.Println(string(md))
 	t.Data = WriteMessage(string(md), t.Data)
 }

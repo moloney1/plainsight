@@ -49,17 +49,19 @@ func ReadMessage(bytes []byte, bytesToRead int) (string, error) {
 }
 
 // Encode message to binary and write it to the byte slice (from byte 0) via LSB steganography, return modified byte slice
-func WriteMessage(message string, bytes []byte) []byte {
+// Note fromByte needs to be 0 or multiple of 8 to play nicely
+func WriteMessage(message string, bytes []byte, fromByte int) []byte { // TODO bounds
 	messageBin := encodeMessage(message)
 
 	for i := range len(messageBin) {
 		// messageBin[i] is either '0' (ASCII 48) or '1' (49) so subtracting '0' gives us the bit value
 		messageBit := messageBin[i] - '0'
 
+		idx := i + fromByte
 		if messageBit == 0 {
-			bytes[i] = bytes[i] &^ 1 // &^ 1 sets LSB to 0
+			bytes[idx] = bytes[idx] &^ 1 // &^ 1 sets LSB to 0
 		} else {
-			bytes[i] = bytes[i] | 1 // | 1 sets LSB to 1
+			bytes[idx] = bytes[idx] | 1 // | 1 sets LSB to 1
 		}
 	}
 	return bytes

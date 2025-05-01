@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"hash/fnv"
 )
 
 const metaSizeBytes = 512
@@ -80,6 +81,76 @@ func TableFromBytes(bytes []uint8) (*Table, error) {
 	return &Table{}, errors.New("data invalid")
 }
 
+// Add item to table. 'value' is assumed to be a valid JSON string
+func (t *Table) Add(key, value string) {
+	idx := calculateIndex(key, t.Meta.Cap)
+
+	WriteMessage(value, t.Data, idx)
+
+	t.Meta.Keys = append(t.Meta.Keys, key)
+	t.Meta.Size = t.Meta.Size + 1
+
+	t.commitMetadata()
+}
+
+// Read and return JSON value stored under key 'key'
+func (t *Table) Read(key string) (string, error) {
+	idx := calculateIndex(key, t.Meta.Cap)
+
+	firstChar, err := ReadMessage(t.Data[idx:idx+bitsPerByte], 1)
+
+	if firstChar != fmt.Sprintf("%c", openCurlyBrace) {
+		return "", fmt.Errorf("no data for key %s", key)
+	}
+
+	if err != nil {
+		return "", err
+	}
+
+	m := make(map[string]string)
+	for i := idx + bitsPerByte; i < idx+bucketSizeBytes; i += bitsPerByte {
+
+		char, err := ReadMessage(t.Data[i:i+bitsPerByte], 1)
+		if err != nil {
+			return "", err
+		}
+
+		if char == fmt.Sprintf("%c", closeCurlyBrace) {
+			jsonString, err := ReadMessage(
+				t.Data[idx:idx+i+bitsPerByte+bitsPerByte+bitsPerByte],
+				((i+bitsPerByte)-idx)/bitsPerByte,
+			)
+			if err != nil {
+				return "", err
+			}
+
+			err = json.Unmarshal([]byte(jsonString), &m)
+			if err == nil {
+				return jsonString, nil
+			}
+		}
+	}
+
+	return "", fmt.Errorf("no data or invalid data for key %s", key)
+}
+
+// Calculate an index in Table.Data to store value at based on hash of 'key'
+func calculateIndex(key string, capacity int) int {
+	hash := fnv.New64a()
+	hash.Write([]byte(key))
+	idx := int(hash.Sum64() % uint64(capacity))
+
+	// Not really needed but we like round numbers :D
+	for idx%8 != 0 {
+		idx += 1
+	}
+
+	fmt.Printf("Index: %d\n", idx)
+
+	return idx
+}
+
+// Write struct Meta updates to data
 func (t *Table) commitMetadata() {
 	md, err := json.Marshal(t.Meta)
 	if err != nil {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -37,6 +38,10 @@ func decodeMessage(message string) string {
 
 // Read the bits up to bytesToRead, return them decoded to plaintext
 func ReadMessage(bytes []byte, bytesToRead int) (string, error) {
+	if bytesToRead > len(bytes)/bitsPerByte || bytesToRead < 0 {
+		return "", fmt.Errorf("value %d for bytesToRead is invalid", bytesToRead)
+	}
+
 	var builder strings.Builder
 
 	for i := range bitsPerByte * bytesToRead {
@@ -50,7 +55,11 @@ func ReadMessage(bytes []byte, bytesToRead int) (string, error) {
 
 // Encode message to binary and write it to the byte slice (from byte 0) via LSB steganography, return modified byte slice
 // Note fromByte needs to be 0 or multiple of 8 to play nicely
-func WriteMessage(message string, bytes []byte, fromByte int) []byte { // TODO bounds
+func WriteMessage(message string, bytes []byte, fromByte int) ([]byte, error) { // TODO bounds
+	if fromByte+(len(message)*8) > len(bytes) || fromByte < 0 {
+		return []byte{}, errors.New("invalid args: out of range")
+	}
+
 	messageBin := encodeMessage(message)
 
 	for i := range len(messageBin) {
@@ -64,5 +73,5 @@ func WriteMessage(message string, bytes []byte, fromByte int) []byte { // TODO b
 			bytes[idx] = bytes[idx] | 1 // | 1 sets LSB to 1
 		}
 	}
-	return bytes
+	return bytes, nil
 }

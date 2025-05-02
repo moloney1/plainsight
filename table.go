@@ -156,5 +156,5 @@ func (t *Table) commitMetadata() {
 	if err != nil {
 		panic(err)
 	}
-	t.Data = WriteMessage(string(md), t.Data, 0)
+	t.Data, _ = WriteMessage(string(md), t.Data, 0)
 }

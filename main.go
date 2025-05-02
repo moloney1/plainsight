@@ -86,7 +86,7 @@ func testCodec() {
 		panic(err)
 	}
 
-	img.Pix = WriteMessage("Hello World!", img.Pix, 8)
+	img.Pix, _ = WriteMessage("Hello World!", img.Pix, 8)
 
 	if err = WriteImageFile(outputFile, img); err != nil {
 		panic(err)

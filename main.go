@@ -9,9 +9,14 @@ const inputFile = "test_img.png"
 const outputFile = "output.png"
 
 func main() {
-	// testCodec()
-	//testTable()
+	testCodec()
+	fmt.Println()
+
+	testTable()
+	fmt.Println()
+
 	testHashAddAndRead()
+	fmt.Println()
 }
 
 func testHashAddAndRead() {
@@ -26,12 +31,12 @@ func testHashAddAndRead() {
 	img, _ := ReadImage(inputFile)
 
 	someValidJson := "{\"test\": \"yes\"}"
-	t := NewTable(img.Pix)
+	t, _ := NewTable(img.Pix, fnv.New64a())
 	t.Add("myKey", someValidJson)
 	WriteImageFile(outputFile, img)
 
 	newImg, _ := ReadImage(outputFile)
-	newT, err := TableFromBytes(newImg.Pix)
+	newT, err := TableFromBytes(newImg.Pix, fnv.New64a())
 	if err != nil {
 		panic(err)
 	}
@@ -42,7 +47,14 @@ func testHashAddAndRead() {
 	}
 	fmt.Printf("Got message: %s\n", msg)
 
-	s, err := t.Read("myKey")
+	s, err := newT.Read("myKey")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("reading myKey: %s\n", s)
+
+	// try that again to be sure hash.Reset() worked
+	s, err = newT.Read("myKey")
 	if err != nil {
 		panic(err)
 	}
@@ -57,7 +69,7 @@ func testTable() {
 		panic(err)
 	}
 
-	t := NewTable(img.Pix)
+	t, _ := NewTable(img.Pix, fnv.New64a())
 	fmt.Println(t.Meta.Cap)
 	fmt.Println(t.Meta.Size)
 	fmt.Println(t.Meta.Keys)
@@ -72,7 +84,7 @@ func testTable() {
 	// 	panic(err)
 	// }
 	// fmt.Printf("Read following message from %s: '%s'", outputFile, decodedMessage)
-	newT, err := TableFromBytes(newImg.Pix)
+	newT, err := TableFromBytes(newImg.Pix, fnv.New64a())
 	if err != nil {
 		panic(err)
 	}
@@ -86,7 +98,8 @@ func testCodec() {
 		panic(err)
 	}
 
-	img.Pix, _ = WriteMessage("Hello World!", img.Pix, 8)
+	// img.Pix, _ = WriteMessage("Hello World!", img.Pix, 8)
+	img.Pix, _ = WriteMessage("Hello World!", img.Pix, 0)
 
 	if err = WriteImageFile(outputFile, img); err != nil {
 		panic(err)

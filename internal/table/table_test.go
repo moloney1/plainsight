@@ -1,9 +1,11 @@
-package main
+package table
 
 import (
 	"fmt"
 	"slices"
 	"testing"
+
+	"github.com/moloney1/plainsight/internal/codec"
 )
 
 type MockHasher struct{}
@@ -34,7 +36,7 @@ func TestNewTableNegative(t *testing.T) {
 func TestTableFromBytesPositive(t *testing.T) {
 	metadataJson := "{\"cap\":1234,\"size\":1,\"keys\":[\"someKey\"]}"
 	bytes := make([]byte, 1000)
-	bytes, _ = WriteMessage(metadataJson, bytes, 0)
+	bytes, _ = codec.WriteMessage(metadataJson, bytes, 0)
 
 	_, err := TableFromBytes(bytes, MockHasher{})
 	if err != nil {
@@ -56,7 +58,7 @@ func TestTableFromBytesNegative(t *testing.T) {
 
 	for _, tc := range tests {
 		bytes := make([]byte, 1000)
-		bytes, _ = WriteMessage(tc.dataToWrite, bytes, 0)
+		bytes, _ = codec.WriteMessage(tc.dataToWrite, bytes, 0)
 		_, err := TableFromBytes(bytes, MockHasher{})
 		if err == nil {
 			t.Errorf("expected error")
@@ -69,8 +71,8 @@ func TestReadPositive(t *testing.T) {
 	metadataJson := "{\"cap\":1234,\"size\":1,\"keys\":[\"someKey\"]}"
 	entryJson := "{\"user\":\"yourName\",\"pass\":\"hunter2\"}"
 	bytes := make([]byte, 2000)
-	bytes, _ = WriteMessage(metadataJson, bytes, 0)
-	bytes, _ = WriteMessage(entryJson, bytes, 552) // to match what the MockHasher returns
+	bytes, _ = codec.WriteMessage(metadataJson, bytes, 0)
+	bytes, _ = codec.WriteMessage(entryJson, bytes, 552) // to match what the MockHasher returns
 
 	table, err := TableFromBytes(bytes, MockHasher{})
 	if err != nil {
@@ -98,8 +100,8 @@ func TestReadNegative(t *testing.T) {
 
 	for _, tc := range tests {
 		bytes := make([]byte, 2000)
-		bytes, _ = WriteMessage(tc.metadataToWrite, bytes, 0)
-		bytes, _ = WriteMessage(tc.dataToWrite, bytes, 552) // to match what the MockHasher returns
+		bytes, _ = codec.WriteMessage(tc.metadataToWrite, bytes, 0)
+		bytes, _ = codec.WriteMessage(tc.dataToWrite, bytes, 552) // to match what the MockHasher returns
 
 		table, err := TableFromBytes(bytes, MockHasher{})
 		if err != nil {

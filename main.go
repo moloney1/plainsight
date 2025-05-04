@@ -4,23 +4,25 @@ import (
 	"fmt"
 	"hash/fnv"
 
-	"github.com/moloney1/plainsight/cmd"
+	"github.com/moloney1/plainsight/internal/codec"
+	"github.com/moloney1/plainsight/internal/imageio"
+	"github.com/moloney1/plainsight/internal/table"
 )
 
 const inputFile = "test_img.png"
 const outputFile = "output.png"
 
 func main() {
-	// 	testCodec()
-	// 	fmt.Println()
-	//
-	// 	testTable()
-	// 	fmt.Println()
-	//
-	// 	testHashAddAndRead()
-	// 	fmt.Println()
+	testCodec()
+	fmt.Println()
 
-	cmd.Execute()
+	testTable()
+	fmt.Println()
+
+	testHashAddAndRead()
+	fmt.Println()
+
+	// cmd.Execute()
 
 }
 
@@ -33,20 +35,20 @@ func testHashAddAndRead() {
 	g.Write([]byte("hello"))
 	fmt.Printf("%v\n", g.Sum64())
 
-	img, _ := ReadImage(inputFile)
+	img, _ := imageio.ReadImage(inputFile)
 
 	someValidJson := "{\"test\": \"yes\"}"
-	t, _ := NewTable(img.Pix, fnv.New64a())
+	t, _ := table.NewTable(img.Pix, fnv.New64a())
 	t.Add("myKey", someValidJson)
-	WriteImageFile(outputFile, img)
+	imageio.WriteImageFile(outputFile, img)
 
-	newImg, _ := ReadImage(outputFile)
-	newT, err := TableFromBytes(newImg.Pix, fnv.New64a())
+	newImg, _ := imageio.ReadImage(outputFile)
+	newT, err := table.TableFromBytes(newImg.Pix, fnv.New64a())
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println(newT.Meta)
-	msg, err := ReadMessage(t.Data[73088:], 15)
+	msg, err := codec.ReadMessage(t.Data[73088:], 15)
 	if err != nil {
 		panic(err)
 	}
@@ -69,27 +71,27 @@ func testHashAddAndRead() {
 
 func testTable() {
 
-	img, err := ReadImage(inputFile)
+	img, err := imageio.ReadImage(inputFile)
 	if err != nil {
 		panic(err)
 	}
 
-	t, _ := NewTable(img.Pix, fnv.New64a())
+	t, _ := table.NewTable(img.Pix, fnv.New64a())
 	fmt.Println(t.Meta.Cap)
 	fmt.Println(t.Meta.Size)
 	fmt.Println(t.Meta.Keys)
 	fmt.Println(len(t.Data))
 
 	img.Pix = t.Data
-	WriteImageFile(outputFile, img)
+	imageio.WriteImageFile(outputFile, img)
 
-	newImg, _ := ReadImage(outputFile)
+	newImg, _ := imageio.ReadImage(outputFile)
 	// decodedMessage, err := ReadMessage(newImg.Pix, 44)
 	// if err != nil {
 	// 	panic(err)
 	// }
 	// fmt.Printf("Read following message from %s: '%s'", outputFile, decodedMessage)
-	newT, err := TableFromBytes(newImg.Pix, fnv.New64a())
+	newT, err := table.TableFromBytes(newImg.Pix, fnv.New64a())
 	if err != nil {
 		panic(err)
 	}
@@ -98,24 +100,24 @@ func testTable() {
 }
 
 func testCodec() {
-	img, err := ReadImage(inputFile)
+	img, err := imageio.ReadImage(inputFile)
 	if err != nil {
 		panic(err)
 	}
 
 	// img.Pix, _ = WriteMessage("Hello World!", img.Pix, 8)
-	img.Pix, _ = WriteMessage("Hello World!", img.Pix, 0)
+	img.Pix, _ = codec.WriteMessage("Hello World!", img.Pix, 0)
 
-	if err = WriteImageFile(outputFile, img); err != nil {
+	if err = imageio.WriteImageFile(outputFile, img); err != nil {
 		panic(err)
 	}
 
-	img, err = ReadImage(outputFile)
+	img, err = imageio.ReadImage(outputFile)
 	if err != nil {
 		panic(err)
 	}
 
-	decodedMessage, err := ReadMessage(img.Pix, 12)
+	decodedMessage, err := codec.ReadMessage(img.Pix, 12)
 	if err != nil {
 		panic(err)
 	}

@@ -1,10 +1,13 @@
-package main
+package table
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
 	"hash"
+
+	"github.com/moloney1/plainsight/internal/codec"
+	"github.com/moloney1/plainsight/internal/constants"
 )
 
 const metaSizeBytes = 512
@@ -12,6 +15,8 @@ const bucketSizeBytes = 1024
 
 const openCurlyBrace = 123
 const closeCurlyBrace = 125
+
+const bitsPerByte = constants.BitsPerByte
 
 type metadata struct {
 	Cap  int      `json:"cap"`
@@ -50,7 +55,7 @@ func NewTable(bytes []uint8, hasher hash.Hash64) (*Table, error) {
 // Return a previously populated Table
 func TableFromBytes(bytes []uint8, hasher hash.Hash64) (*Table, error) {
 
-	firstChar, err := ReadMessage(bytes[:bitsPerByte], 1)
+	firstChar, err := codec.ReadMessage(bytes[:bitsPerByte], 1)
 	if err != nil {
 		return &Table{}, err
 	}
@@ -62,13 +67,13 @@ func TableFromBytes(bytes []uint8, hasher hash.Hash64) (*Table, error) {
 	meta := metadata{}
 
 	for i := bitsPerByte; i < metaSizeBytes; i += bitsPerByte { // TODO find somewhere else for bitsPerByte const // TODO bounds?
-		char, err := ReadMessage(bytes[i:i+bitsPerByte], 1)
+		char, err := codec.ReadMessage(bytes[i:i+bitsPerByte], 1)
 		if err != nil {
 			return &Table{}, err
 		}
 		if char == fmt.Sprintf("%c", closeCurlyBrace) {
 
-			jsonString, err := ReadMessage(bytes[:i+bitsPerByte], (i+bitsPerByte)/bitsPerByte)
+			jsonString, err := codec.ReadMessage(bytes[:i+bitsPerByte], (i+bitsPerByte)/bitsPerByte)
 			if err != nil {
 				return &Table{}, err
 			}
@@ -91,7 +96,7 @@ func (t *Table) Add(key, value string) error {
 	idx := t.calculateIndex(key, t.Meta.Cap)
 
 	var err error
-	t.Data, err = WriteMessage(value, t.Data, idx)
+	t.Data, err = codec.WriteMessage(value, t.Data, idx)
 	if err != nil {
 		return err
 	}
@@ -108,7 +113,7 @@ func (t *Table) Add(key, value string) error {
 func (t *Table) Read(key string) (string, error) {
 	idx := t.calculateIndex(key, t.Meta.Cap)
 
-	firstChar, err := ReadMessage(t.Data[idx:idx+bitsPerByte], 1)
+	firstChar, err := codec.ReadMessage(t.Data[idx:idx+bitsPerByte], 1)
 	if err != nil {
 		return "", err
 	}
@@ -120,13 +125,13 @@ func (t *Table) Read(key string) (string, error) {
 	m := make(map[string]string)
 	for i := idx + bitsPerByte; i < idx+bucketSizeBytes; i += bitsPerByte {
 
-		char, err := ReadMessage(t.Data[i:i+bitsPerByte], 1)
+		char, err := codec.ReadMessage(t.Data[i:i+bitsPerByte], 1)
 		if err != nil {
 			return "", err
 		}
 
 		if char == fmt.Sprintf("%c", closeCurlyBrace) {
-			jsonString, err := ReadMessage(
+			jsonString, err := codec.ReadMessage(
 				t.Data[idx:idx+i+bitsPerByte+bitsPerByte+bitsPerByte],
 				((i+bitsPerByte)-idx)/bitsPerByte,
 			)
@@ -166,7 +171,7 @@ func (t *Table) commitMetadata() error {
 	if err != nil {
 		return err
 	}
-	t.Data, err = WriteMessage(string(md), t.Data, 0)
+	t.Data, err = codec.WriteMessage(string(md), t.Data, 0)
 	if err != nil {
 		return err
 	}

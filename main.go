@@ -3,20 +3,25 @@ package main
 import (
 	"fmt"
 	"hash/fnv"
+
+	"github.com/moloney1/plainsight/cmd"
 )
 
 const inputFile = "test_img.png"
 const outputFile = "output.png"
 
 func main() {
-	testCodec()
-	fmt.Println()
+	// 	testCodec()
+	// 	fmt.Println()
+	//
+	// 	testTable()
+	// 	fmt.Println()
+	//
+	// 	testHashAddAndRead()
+	// 	fmt.Println()
 
-	testTable()
-	fmt.Println()
+	cmd.Execute()
 
-	testHashAddAndRead()
-	fmt.Println()
 }
 
 func testHashAddAndRead() {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"hash/fnv"
 
+	"github.com/moloney1/plainsight/cmd"
 	"github.com/moloney1/plainsight/internal/codec"
 	"github.com/moloney1/plainsight/internal/imageio"
 	"github.com/moloney1/plainsight/internal/table"
@@ -13,16 +14,16 @@ const inputFile = "test_img.png"
 const outputFile = "output.png"
 
 func main() {
-	testCodec()
-	fmt.Println()
-
-	testTable()
-	fmt.Println()
-
-	testHashAddAndRead()
-	fmt.Println()
-
-	// cmd.Execute()
+	// 	testCodec()
+	// 	fmt.Println()
+	//
+	// 	testTable()
+	// 	fmt.Println()
+	//
+	// 	testHashAddAndRead()
+	// 	fmt.Println()
+	//
+	cmd.Execute()
 
 }
 

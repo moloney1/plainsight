@@ -149,6 +149,11 @@ func (t *Table) Read(key string) (string, error) {
 	return "", fmt.Errorf("no data or invalid data for key %s", key)
 }
 
+// Return list of stored keys
+func (t *Table) List() []string {
+	return t.Meta.Keys
+}
+
 // Calculate an index in Table.Data to store value at based on hash of 'key'
 func (t *Table) calculateIndex(key string, capacity int) int {
 	t.Hash.Write([]byte(key))

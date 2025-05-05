@@ -7,6 +7,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var imageFile string
+var keyToSearch string
+
 var rootCmd = &cobra.Command{
 	Use:   "plainsight",
 	Short: "plainsight hides data in your favourite PNG files",
@@ -17,9 +20,6 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
-	var imageFile string
-	rootCmd.PersistentFlags().StringVarP(&imageFile, "file", "f", "", "image file path")
-	rootCmd.MarkPersistentFlagRequired("file")
 }
 
 func Execute() {

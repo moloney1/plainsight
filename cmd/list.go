@@ -13,6 +13,8 @@ import (
 
 func init() {
 	rootCmd.AddCommand(listCmd)
+	listCmd.PersistentFlags().StringVarP(&imageFile, "file", "f", "", "image file path")
+	listCmd.MarkPersistentFlagRequired("file")
 }
 
 var listCmd = &cobra.Command{
@@ -21,17 +23,15 @@ var listCmd = &cobra.Command{
 	Short:   "List the keys of the data stored in file",
 	Long:    `List the keys of the data stored in file`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// fmt.Printf("The file you want to look at is %v\n", rootCmd.PersistentFlags().Lookup("file").Value)
-
-		imgPath := rootCmd.PersistentFlags().Lookup("file").Value.String()
-		img, err := imageio.ReadImage(imgPath)
+		img, err := imageio.ReadImage(imageFile)
 		if err != nil {
 			fmt.Printf("Error reading image file: %s\n", err)
 			os.Exit(1)
 		}
 		table, err := table.TableFromBytes(img.Pix, fnv.New64a())
 		if err != nil {
-			fmt.Printf("Plainsight does not recognize the file %s\n", imgPath)
+			fmt.Printf("Plainsight does not recognize the file %s\n", imageFile)
+			os.Exit(1)
 		}
 		fmt.Println(table.List())
 	},

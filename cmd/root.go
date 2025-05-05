@@ -9,6 +9,7 @@ import (
 
 var imageFile string
 var keyToSearch string
+var jsonData string
 
 var rootCmd = &cobra.Command{
 	Use:   "plainsight",

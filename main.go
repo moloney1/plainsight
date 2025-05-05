@@ -23,7 +23,19 @@ func main() {
 	// 	testHashAddAndRead()
 	// 	fmt.Println()
 	//
+
+	// test()
+
 	cmd.Execute()
+
+}
+
+func test() {
+	h := fnv.New64a()
+	img, _ := imageio.ReadImage("new.png")
+	t, _ := table.TableFromBytes(img.Pix, h)
+	res, _ := codec.ReadMessage(t.Data[120544:], 20)
+	fmt.Println(res)
 
 }
 

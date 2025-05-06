@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"hash/fnv"
 	"os"
+	"slices"
 
 	"github.com/spf13/cobra"
 
@@ -47,8 +48,13 @@ var addCmd = &cobra.Command{
 			}
 		}
 
+		if slices.Contains(t.Meta.Keys, key) {
+			fmt.Printf("Image %s already has data stored under key %s. Taking no action", imageFile, key)
+			os.Exit(1)
+		}
+
 		if err := t.Add(key, jsonData); err != nil {
-			fmt.Println(err)
+			fmt.Printf("Error adding data under key %s: %v", key, err)
 			os.Exit(1)
 		}
 

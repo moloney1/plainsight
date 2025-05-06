@@ -17,7 +17,7 @@ func init() {
 	addCmd.PersistentFlags().StringVarP(&imageFile, "file", "f", "", "image file path")
 	addCmd.MarkPersistentFlagRequired("file")
 
-	addCmd.PersistentFlags().StringVarP(&keyToSearch, "key", "k", "", "key to read")
+	addCmd.PersistentFlags().StringVarP(&key, "key", "k", "", "key to read")
 	addCmd.MarkPersistentFlagRequired("key")
 
 	addCmd.PersistentFlags().StringVarP(&jsonData, "data", "d", "", "data to add")
@@ -29,30 +29,30 @@ var addCmd = &cobra.Command{
 	Use:     "add",
 	Aliases: []string{"a"},
 	Short:   "Add data to your image",
-	Long:    `Add specified JSON data to image under supplied key`,
+	Long:    `Add specified JSON data to image under supplied key. Example: 'plainsight add --file myImageFile.png --key myKey --data {\"password\":\"myPassword\"}'`,
 	Run: func(cmd *cobra.Command, args []string) {
 		img, err := imageio.ReadImage(imageFile)
 		if err != nil {
-			fmt.Printf("Error reading image file: %s\n", err)
+			fmt.Printf("Error reading image file: %s", err)
 			os.Exit(1)
 		}
 		hasher := fnv.New64a()
 		t, err := table.TableFromBytes(img.Pix, hasher)
 		if err != nil {
-			fmt.Printf("Plainsight does not recognize the file %s\n", imageFile)
+			fmt.Printf("Plainsight does not recognize the file. Attempting to register %s\n", imageFile)
 			t, err = table.NewTable(img.Pix, hasher)
 			if err != nil {
-				fmt.Printf("Error initializing image file %s: %v", imageFile, err)
+				fmt.Printf("Error registering image file %s: %v", imageFile, err)
 				os.Exit(1)
 			}
 		}
 
-		if err := t.Add(keyToSearch, jsonData); err != nil {
+		if err := t.Add(key, jsonData); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
 		imageio.WriteImageFile("new.png", img) // for now, always create a new file instead of overwriting.
-		fmt.Println("successful!")
+		fmt.Print("Output written to file new.png")
 	},
 }

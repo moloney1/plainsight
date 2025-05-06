@@ -8,7 +8,7 @@ import (
 )
 
 var imageFile string
-var keyToSearch string
+var key string
 var jsonData string
 
 var rootCmd = &cobra.Command{
@@ -16,11 +16,7 @@ var rootCmd = &cobra.Command{
 	Short: "plainsight hides data in your favourite PNG files",
 	Long:  `A tool for embedding data into PNG images and managing the embedded data`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("uh, hello?")
 	},
-}
-
-func init() {
 }
 
 func Execute() {

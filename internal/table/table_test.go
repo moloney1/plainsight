@@ -1,3 +1,4 @@
+// TODO convert identifiers of instances of struct Table to tbl
 package table
 
 import (
@@ -8,6 +9,8 @@ import (
 	"github.com/moloney1/plainsight/internal/codec"
 )
 
+const mockIndex = 552
+
 type MockHasher struct{}
 
 func (m MockHasher) Write(p []byte) (int, error) { return len(p), nil }
@@ -15,7 +18,7 @@ func (m MockHasher) Sum(b []byte) []byte         { return b }
 func (m MockHasher) Reset()                      {}
 func (m MockHasher) Size() int                   { return 0 }
 func (m MockHasher) BlockSize() int              { return 0 }
-func (m MockHasher) Sum64() uint64               { return 552 }
+func (m MockHasher) Sum64() uint64               { return mockIndex }
 
 func TestNewTablePositive(t *testing.T) {
 	bytes := make([]byte, 1000)
@@ -72,7 +75,7 @@ func TestReadPositive(t *testing.T) {
 	entryJson := "{\"user\":\"yourName\",\"pass\":\"hunter2\"}"
 	bytes := make([]byte, 2000)
 	bytes, _ = codec.WriteMessage(metadataJson, bytes, 0)
-	bytes, _ = codec.WriteMessage(entryJson, bytes, 552) // to match what the MockHasher returns
+	bytes, _ = codec.WriteMessage(entryJson, bytes, mockIndex)
 
 	table, err := TableFromBytes(bytes, MockHasher{})
 	if err != nil {
@@ -101,7 +104,7 @@ func TestReadNegative(t *testing.T) {
 	for _, tc := range tests {
 		bytes := make([]byte, 2000)
 		bytes, _ = codec.WriteMessage(tc.metadataToWrite, bytes, 0)
-		bytes, _ = codec.WriteMessage(tc.dataToWrite, bytes, 552) // to match what the MockHasher returns
+		bytes, _ = codec.WriteMessage(tc.dataToWrite, bytes, mockIndex) // to match what the MockHasher returns
 
 		table, err := TableFromBytes(bytes, MockHasher{})
 		if err != nil {
@@ -126,6 +129,32 @@ func TestAddPositive(t *testing.T) {
 	addedToMetaKeys := slices.Contains(table.Meta.Keys, "someKey")
 	if addedToMetaKeys != true {
 		t.Error("expected someKey to be added to table metadata.Keys")
+	}
+}
+
+func TestDeletePositive(t *testing.T) {
+	metadataJson := "{\"cap\":1234,\"size\":1,\"keys\":[\"someKey\"]}"
+	entryJson := "{\"user\":\"yourName\",\"pass\":\"hunter2\"}"
+	bytes := make([]byte, 2000)
+	bytes, _ = codec.WriteMessage(metadataJson, bytes, 0)
+	bytes, _ = codec.WriteMessage(entryJson, bytes, mockIndex)
+
+	tbl, _ := TableFromBytes(bytes, MockHasher{})
+	// fmt.Println(tbl)
+
+	sizeBefore := tbl.Meta.Size
+
+	err := tbl.Delete("someKey")
+
+	if err != nil {
+		t.Errorf("unexpected error %v", err)
+	}
+	if slices.Contains(tbl.Meta.Keys, "someKey") {
+		t.Errorf("expected key 'someKey' to have been deleted from table metadata: %v", tbl.Meta)
+	}
+	sizeAfter := tbl.Meta.Size
+	if sizeAfter != sizeBefore-1 {
+		t.Errorf("expected size to be reduced, size is %d", sizeAfter)
 	}
 
 }

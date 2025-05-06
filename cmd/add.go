@@ -48,6 +48,7 @@ var addCmd = &cobra.Command{
 			}
 		}
 
+		// TODO this logic should be moved to table.go
 		if slices.Contains(t.Meta.Keys, key) {
 			fmt.Printf("Image %s already has data stored under key %s. Taking no action", imageFile, key)
 			os.Exit(1)

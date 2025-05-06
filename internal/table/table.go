@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"hash"
+	"math/rand"
+	"slices"
 
 	"github.com/moloney1/plainsight/internal/codec"
 	"github.com/moloney1/plainsight/internal/constants"
@@ -105,6 +107,36 @@ func (t *Table) Add(key, value string) error {
 	t.Meta.Size = t.Meta.Size + 1
 
 	t.commitMetadata()
+
+	return nil
+}
+
+// Delete writes random data over where key is currently stored
+func (t *Table) Delete(key string) error {
+
+	if !slices.Contains(t.Meta.Keys, key) {
+		return fmt.Errorf("nothing to delete at key %s", key)
+	}
+
+	idx := t.calculateIndex(key, t.Meta.Cap)
+
+	// Remove the key from the Metadata
+	t.Meta.Keys = slices.DeleteFunc(t.Meta.Keys, func(s string) bool {
+		return s == key
+	})
+	t.Meta.Size -= 1
+	t.commitMetadata()
+
+	// Generate a random string that will take up exactly 'bucketSizeBytes'
+	randBytes := make([]byte, bucketSizeBytes/bitsPerByte)
+	for i := range len(randBytes) {
+		randBytes[i] = byte(rand.Intn(128))
+	}
+	var err error
+	t.Data, err = codec.WriteMessage(string(randBytes), t.Data, idx)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

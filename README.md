@@ -8,5 +8,11 @@ Inspired by [this video](https://www.youtube.com/shorts/Udf44K6rt-E). I, too, th
 ## How does it work?
 Plainsight edits your image file using a technique called least significant bit (LSB) steganography. [This article](https://medium.com/@renantkn/lsb-steganography-hiding-a-message-in-the-pixels-of-an-image-4722a8567046) will tell you everything you want to know. Plainsight effectively turns your image into a key-value store, with data being organized kind of like a persistent hash table.
 
+## Feature Roadmap
+- Ability to add in arbitrary JSON data from file
+- Option to encrypt data using (probably) PBKDF2
+- Password generation
+- Edit command
+
 ## Examples
 Coming soon to a README near you!

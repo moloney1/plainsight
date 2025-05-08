@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"hash/fnv"
 	"os"
@@ -33,17 +34,33 @@ var readCmd = &cobra.Command{
 			fmt.Printf("Error reading image file: %s", err)
 			os.Exit(1)
 		}
-		table, err := table.TableFromBytes(img.Pix, fnv.New64a())
+		tbl, err := table.TableFromBytes(img.Pix, fnv.New64a())
 		if err != nil {
 			fmt.Printf("Plainsight does not recognize the file %s", imageFile)
 			os.Exit(1)
 		}
 
-		result, err := table.Read(key)
+		jsonResult, err := tbl.Read(key)
+
 		if err != nil {
 			fmt.Printf("Error reading data for key %s: %v", key, err)
 			os.Exit(1)
 		}
-		fmt.Printf("Found the following data for key %s: %s", key, result)
+
+		var userPassPair table.UserPass
+		if err = json.Unmarshal([]byte(jsonResult), &userPassPair); err != nil {
+			fmt.Printf("Error reading data for key %s: %v", key, err)
+			os.Exit(1)
+		}
+
+		if userPassPair.User == "" && userPassPair.Pass == "" {
+			// TODO if stored arbitrary JSON has user or pass key then...
+			fmt.Printf("Found the following data for key %s: %s", key, jsonResult)
+			os.Exit(0)
+		}
+
+		fmt.Printf("Found the following data for key %s:\n", key)
+		fmt.Printf("Username: %s\n", userPassPair.User)
+		fmt.Printf("Password: %s\n", userPassPair.Pass)
 	},
 }

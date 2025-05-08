@@ -32,6 +32,11 @@ type Table struct {
 	Hash hash.Hash64
 }
 
+type UserPass struct {
+	User string `json:"user"`
+	Pass string `json:"pass"`
+}
+
 // Return an new empty Table
 func NewTable(bytes []uint8, hasher hash.Hash64) (*Table, error) {
 
@@ -109,6 +114,17 @@ func (t *Table) Add(key, value string) error {
 	t.commitMetadata()
 
 	return nil
+}
+
+// Encode username/password pair to JSON and add to table
+func (t *Table) AddUsernamePasswordPair(key, username, password string) error {
+
+	pair, err := json.Marshal(UserPass{User: username, Pass: password})
+	if err != nil {
+		return err
+	}
+
+	return t.Add(key, string(pair))
 }
 
 // Delete writes random data over where key is currently stored

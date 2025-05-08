@@ -11,6 +11,9 @@ var imageFile string
 var key string
 var jsonData string
 
+var username string
+var password string
+
 var rootCmd = &cobra.Command{
 	Use:   "plainsight",
 	Short: "plainsight hides data in your favourite PNG files",

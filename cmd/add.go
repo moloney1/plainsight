@@ -19,5 +19,5 @@ var addCmd = &cobra.Command{
 	Use:     "add",
 	Aliases: []string{"a"},
 	Short:   "Add data to your image",
-	Long:    `Add specified data to image under supplied key. Choose between [--username, --password] and... nothing else for now.`,
+	Long:    `Add specified data to image under supplied key. See 'plainsight help add' for subcommand options.`,
 }

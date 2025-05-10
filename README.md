@@ -13,6 +13,7 @@ Plainsight edits your image file using a technique called least significant bit 
 - Option to encrypt data using (probably) PBKDF2
 - Password generation
 - Edit command
+- Collision handling
 
 ## Examples
 Coming soon to a README near you!

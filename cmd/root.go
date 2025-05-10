@@ -7,12 +7,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Global flags
 var imageFile string
 var key string
 var jsonData string
 
+// 'add credentials'
 var username string
 var password string
+
+// 'add from-file'
+var sourceFile string
 
 var rootCmd = &cobra.Command{
 	Use:   "plainsight",

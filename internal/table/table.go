@@ -170,7 +170,7 @@ func (t *Table) Read(key string) (string, error) {
 		return "", fmt.Errorf("no data for key %s", key)
 	}
 
-	m := make(map[string]string)
+	m := make(map[string]any)
 	for i := idx + bitsPerByte; i < idx+bucketSizeBytes; i += bitsPerByte {
 
 		char, err := codec.ReadMessage(t.Data[i:i+bitsPerByte], 1)

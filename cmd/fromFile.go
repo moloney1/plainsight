@@ -1,4 +1,4 @@
-package cmd
+﻿package cmd
 
 import (
 	"encoding/json"
@@ -15,7 +15,9 @@ func init() {
 	addCmd.AddCommand(fromFileCmd)
 
 	fromFileCmd.PersistentFlags().StringVarP(&sourceFile, "source-file", "s", "", "path to JSON file")
-	fromFileCmd.MarkPersistentFlagRequired("source-file")
+	if err := fromFileCmd.MarkPersistentFlagRequired("source-file"); err != nil {
+		panic(err)
+	}
 }
 
 var fromFileCmd = &cobra.Command{
@@ -37,7 +39,7 @@ var fromFileCmd = &cobra.Command{
 			fmt.Printf("Error reading source file %s: %v", sourceFile, err)
 			os.Exit(1)
 		}
-		defer file.Close()
+		defer file.Close() //nolint
 		jsonBytes, err := io.ReadAll(file)
 		if err != nil {
 			fmt.Printf("Error reading source file %s: %v", sourceFile, err)

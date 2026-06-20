@@ -14,10 +14,14 @@ func init() {
 	rootCmd.AddCommand(readCmd)
 
 	readCmd.PersistentFlags().StringVarP(&imageFile, "file", "f", "", "image file path")
-	readCmd.MarkPersistentFlagRequired("file")
+	if err := readCmd.MarkPersistentFlagRequired("file"); err != nil {
+		panic(err)
+	}
 
 	readCmd.PersistentFlags().StringVarP(&key, "key", "k", "", "key to read")
-	readCmd.MarkPersistentFlagRequired("key")
+	if err := readCmd.MarkPersistentFlagRequired("key"); err != nil {
+		panic(err)
+	}
 }
 
 var readCmd = &cobra.Command{

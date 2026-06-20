@@ -8,10 +8,14 @@ func init() {
 	rootCmd.AddCommand(addCmd)
 
 	addCmd.PersistentFlags().StringVarP(&imageFile, "file", "f", "", "image file path")
-	addCmd.MarkPersistentFlagRequired("file")
+	if err := addCmd.MarkPersistentFlagRequired("file"); err != nil {
+		panic(err)
+	}
 
 	addCmd.PersistentFlags().StringVarP(&key, "key", "k", "", "key to add data under")
-	addCmd.MarkPersistentFlagRequired("key")
+	if err := addCmd.MarkPersistentFlagRequired("key"); err != nil {
+		panic(err)
+	}
 
 }
 

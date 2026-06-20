@@ -10,7 +10,9 @@ import (
 func init() {
 	rootCmd.AddCommand(listCmd)
 	listCmd.PersistentFlags().StringVarP(&imageFile, "file", "f", "", "image file path")
-	listCmd.MarkPersistentFlagRequired("file")
+	if err := listCmd.MarkPersistentFlagRequired("file"); err != nil {
+		panic(err)
+	}
 }
 
 var listCmd = &cobra.Command{

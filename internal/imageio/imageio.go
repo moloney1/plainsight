@@ -15,7 +15,7 @@ func ReadImage(filename string) (*image.NRGBA, error) {
 	if err != nil {
 		return &image.NRGBA{}, err
 	}
-	defer imgFile.Close()
+	defer imgFile.Close() //nolint
 
 	reader := bufio.NewReader(imgFile)
 
@@ -42,7 +42,7 @@ func WriteImageFile(filename string, img image.Image) error {
 	if err != nil {
 		return err
 	}
-	defer outFile.Close()
+	defer outFile.Close() //nolint
 	writer := bufio.NewWriter(outFile)
 	err = png.Encode(writer, img)
 	if err != nil {

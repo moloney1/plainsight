@@ -73,7 +73,7 @@ func TableFromBytes(bytes []uint8, hasher hash.Hash64) (*Table, error) {
 
 	meta := metadata{}
 
-	for i := bitsPerByte; i < metaSizeBytes; i += bitsPerByte { // TODO find somewhere else for bitsPerByte const // TODO bounds?
+	for i := bitsPerByte; i < metaSizeBytes; i += bitsPerByte { // TODO bounds?
 		char, err := codec.ReadMessage(bytes[i:i+bitsPerByte], 1)
 		if err != nil {
 			return &Table{}, err
@@ -111,7 +111,9 @@ func (t *Table) Add(key, value string) error {
 	t.Meta.Keys = append(t.Meta.Keys, key)
 	t.Meta.Size = t.Meta.Size + 1
 
-	t.commitMetadata()
+	if err := t.commitMetadata(); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -141,7 +143,9 @@ func (t *Table) Delete(key string) error {
 		return s == key
 	})
 	t.Meta.Size -= 1
-	t.commitMetadata()
+	if err := t.commitMetadata(); err != nil {
+		return err
+	}
 
 	// Generate a random string that will take up exactly 'bucketSizeBytes'
 	randBytes := make([]byte, bucketSizeBytes/bitsPerByte)

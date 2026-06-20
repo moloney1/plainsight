@@ -1,4 +1,4 @@
-package codec
+﻿package codec
 
 import (
 	"errors"
@@ -14,7 +14,7 @@ func encodeMessage(message string) string {
 	var builder strings.Builder
 
 	for i := range len(message) {
-		builder.WriteString(fmt.Sprintf("%08b", message[i]))
+		fmt.Fprintf(&builder, "%08b", message[i])
 	}
 
 	return builder.String()
@@ -45,9 +45,7 @@ func ReadMessage(bytes []byte, bytesToRead int) (string, error) {
 	var builder strings.Builder
 
 	for i := range bitsPerByte * bytesToRead {
-		builder.WriteString(
-			fmt.Sprintf("%v", bytes[i]&1), // &1 grabs the LSB
-		)
+		fmt.Fprintf(&builder, "%v", bytes[i]&1) // &1 grabs the LSB
 	}
 
 	return decodeMessage(builder.String()), nil

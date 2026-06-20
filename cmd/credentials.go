@@ -12,10 +12,14 @@ func init() {
 	addCmd.AddCommand(credentialsCmd)
 
 	credentialsCmd.PersistentFlags().StringVarP(&username, "username", "u", "", "username to store")
-	credentialsCmd.MarkPersistentFlagRequired("username")
+	if err := credentialsCmd.MarkPersistentFlagRequired("username"); err != nil {
+		panic(err)
+	}
 
 	credentialsCmd.PersistentFlags().StringVarP(&password, "password", "p", "", "password to store")
-	credentialsCmd.MarkPersistentFlagRequired("password")
+	if err := credentialsCmd.MarkPersistentFlagRequired("password"); err != nil {
+		panic(err)
+	}
 }
 
 var credentialsCmd = &cobra.Command{

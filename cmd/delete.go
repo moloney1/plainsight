@@ -11,10 +11,14 @@ func init() {
 	rootCmd.AddCommand(deleteCmd)
 
 	deleteCmd.PersistentFlags().StringVarP(&imageFile, "file", "f", "", "image file path")
-	deleteCmd.MarkPersistentFlagRequired("file")
+	if err := deleteCmd.MarkPersistentFlagRequired("file"); err != nil {
+		panic(err)
+	}
 
 	deleteCmd.PersistentFlags().StringVarP(&key, "key", "k", "", "key to delete")
-	deleteCmd.MarkPersistentFlagRequired("key")
+	if err := deleteCmd.MarkPersistentFlagRequired("key"); err != nil {
+		panic(err)
+	}
 }
 
 var deleteCmd = &cobra.Command{

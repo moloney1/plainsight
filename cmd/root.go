@@ -10,7 +10,6 @@ import (
 // Global flags
 var imageFile string
 var key string
-var jsonData string
 
 // 'add credentials'
 var username string

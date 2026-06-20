@@ -27,4 +27,3 @@ jobs:
       uses: golangci/golangci-lint-action@v9.2.1
       with:
         version: v2.12
-        args: "--issues-exit-code 0"

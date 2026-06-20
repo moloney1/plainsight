@@ -132,6 +132,17 @@ func TestAddPositive(t *testing.T) {
 	}
 }
 
+func TestAddNegative(t *testing.T) {
+	table, err := NewTable(make([]byte, 2000), MockHasher{})
+	if err != nil {
+		t.Fatalf("error creating new table: %v", err)
+	}
+	longKey := "this-key-is-long-enough-to-overflow-the-metadata-section"
+	if err = table.Add(longKey, "someValue"); err == nil {
+		t.Error("expected error when metadata section overflows")
+	}
+}
+
 func TestDeletePositive(t *testing.T) {
 	metadataJson := "{\"cap\":1234,\"size\":1,\"keys\":[\"someKey\"]}"
 	entryJson := "{\"user\":\"yourName\",\"pass\":\"hunter2\"}"

@@ -228,6 +228,12 @@ func (t *Table) commitMetadata() error {
 	if err != nil {
 		return err
 	}
+
+	mdString := string(md)
+	if len(mdString)*bitsPerByte > metaSizeBytes {
+		return fmt.Errorf("cannot add: metadata section full, try removing some keys")
+	}
+
 	t.Data, err = codec.WriteMessage(string(md), t.Data, 0)
 	if err != nil {
 		return err

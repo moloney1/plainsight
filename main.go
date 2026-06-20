@@ -34,7 +34,8 @@ func test() {
 	h := fnv.New64a()
 	img, _ := imageio.ReadImage("new.png")
 	t, _ := table.TableFromBytes(img.Pix, h)
-	res, _ := codec.ReadMessage(t.Data[120544:], 20)
+	// res, _ := codec.ReadMessage(t.Data[120544:], 40)
+	res, _ := codec.ReadMessage(t.Data[0:], 512)
 	fmt.Println(res)
 
 }

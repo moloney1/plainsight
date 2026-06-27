@@ -12,7 +12,7 @@ import (
 )
 
 func init() {
-	addCmd.AddCommand(fromFileCmd)
+	insertCmd.AddCommand(fromFileCmd)
 
 	fromFileCmd.PersistentFlags().StringVarP(&sourceFile, "source-file", "s", "", "path to JSON file")
 	if err := fromFileCmd.MarkPersistentFlagRequired("source-file"); err != nil {
@@ -24,7 +24,7 @@ var fromFileCmd = &cobra.Command{
 	Use:     "from-file",
 	Aliases: []string{""},
 	Short:   "Add arbitrary JSON data from file to your image",
-	Long:    `Add arbitrary JSON data from file to your image under supplied key. Example: 'plainsight add --file myImageFile.png --key myKey from-file --source-file myData.json`,
+	Long:    `Add arbitrary JSON data from file to your image under supplied key. Example: 'plainsight insert --file myImageFile.png --key myKey from-file --source-file myData.json`,
 	Run: func(cmd *cobra.Command, args []string) {
 		img, t := openOrCreateTable(imageFile)
 
@@ -52,7 +52,7 @@ var fromFileCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		if err = t.Add(key, strings.TrimSpace(string(jsonBytes))); err != nil {
+		if err = t.Insert(key, strings.TrimSpace(string(jsonBytes))); err != nil {
 			fmt.Printf("Failed to write data to file new.png. Error: %s", err)
 			os.Exit(1)
 		}

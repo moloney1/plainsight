@@ -98,8 +98,8 @@ func TableFromBytes(bytes []uint8, hasher hash.Hash64) (*Table, error) {
 	return &Table{}, errors.New("data invalid")
 }
 
-// Add item to table. 'value' is assumed to be a valid JSON string
-func (t *Table) Add(key, value string) error {
+// Insert item to table. 'value' is assumed to be a valid JSON string
+func (t *Table) Insert(key, value string) error {
 	idx := t.calculateIndex(key, t.Meta.Cap)
 
 	var err error
@@ -126,11 +126,11 @@ func (t *Table) AddUsernamePasswordPair(key, username, password string) error {
 		return err
 	}
 
-	return t.Add(key, string(pair))
+	return t.Insert(key, string(pair))
 }
 
-// Delete writes random data over where key is currently stored
-func (t *Table) Delete(key string) error {
+// Remove writes random data over where key is currently stored
+func (t *Table) Remove(key string) error {
 
 	if !slices.Contains(t.Meta.Keys, key) {
 		return fmt.Errorf("nothing to delete at key %s", key)

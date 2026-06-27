@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	addCmd.AddCommand(credentialsCmd)
+	insertCmd.AddCommand(credentialsCmd)
 
 	credentialsCmd.PersistentFlags().StringVarP(&username, "username", "u", "", "username to store")
 	if err := credentialsCmd.MarkPersistentFlagRequired("username"); err != nil {
@@ -26,7 +26,7 @@ var credentialsCmd = &cobra.Command{
 	Use:     "credentials",
 	Aliases: []string{"cred"},
 	Short:   "Add a username/password pair to your image",
-	Long:    `Add specified username/password pair to image under supplied key. Example: 'plainsight add --file myImageFile.png --key myKey credentials --username "inigo" --password "prepare2die"'`,
+	Long:    `Add specified username/password pair to image under supplied key. Example: 'plainsight insert --file myImageFile.png --key myKey credentials --username "inigo" --password "prepare2die"'`,
 	Run: func(cmd *cobra.Command, args []string) {
 		img, t := openOrCreateTable(imageFile)
 

@@ -122,12 +122,12 @@ func TestReadNegative(t *testing.T) {
 	}
 }
 
-func TestAddPositive(t *testing.T) {
+func TestInsert(t *testing.T) {
 	table, err := NewTable(make([]byte, testSliceSize), MockHasher{})
 	if err != nil {
 		t.Fatalf("error creating new table: %v", err)
 	}
-	if err = table.Add("someKey", "someValue"); err != nil {
+	if err = table.Insert("someKey", "someValue"); err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 	addedToMetaKeys := slices.Contains(table.Meta.Keys, "someKey")
@@ -136,18 +136,18 @@ func TestAddPositive(t *testing.T) {
 	}
 }
 
-func TestAddNegative(t *testing.T) {
+func TestInsertNegative(t *testing.T) {
 	table, err := NewTable(make([]byte, testSliceSize), MockHasher{})
 	if err != nil {
 		t.Fatalf("error creating new table: %v", err)
 	}
 	longKey := "this-key-is-long-enough-to-overflow-the-metadata-section-this-key-is-long-enough-to-overflow-the-metadata-section-this-key-is-long-enough-to-overflow-the-metadata-section-this-key-is-long-enough-to-overflow-the-metadata-section-this-key-is-long-enough-to-overflow-the-metadata-section-this-key-is-long-enough-to-overflow-the-metadata-section-this-key-is-long-enough-to-overflow-the-metadata-section-this-key-is-long-enough-to-overflow-the-metadata-section-"
-	if err = table.Add(longKey, "someValue"); err == nil {
+	if err = table.Insert(longKey, "someValue"); err == nil {
 		t.Error("expected error when metadata section overflows")
 	}
 }
 
-func TestDeletePositive(t *testing.T) {
+func TestRemovePositive(t *testing.T) {
 	metadataJson := "{\"cap\":1234,\"size\":1,\"keys\":[\"someKey\"]}"
 	entryJson := "{\"user\":\"yourName\",\"pass\":\"hunter2\"}"
 	bytes := make([]byte, testSliceSize)
@@ -158,7 +158,7 @@ func TestDeletePositive(t *testing.T) {
 
 	sizeBefore := tbl.Meta.Size
 
-	err := tbl.Delete("someKey")
+	err := tbl.Remove("someKey")
 
 	if err != nil {
 		t.Errorf("unexpected error %v", err)

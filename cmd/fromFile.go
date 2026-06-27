@@ -57,6 +57,6 @@ var fromFileCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		saveOutput(img)
+		saveOutput(img, imageFile)
 	},
 }

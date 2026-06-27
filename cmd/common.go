@@ -47,11 +47,11 @@ func openOrCreateTable(imageFile string) (*image.NRGBA, *table.Table) {
 }
 
 // saveOutput writes the new data to a file.
-func saveOutput(img image.Image) {
-	if err := imageio.WriteImageFile("new.png", img); err != nil {
+func saveOutput(img image.Image, imageFile string) {
+	if err := imageio.WriteImageFile(imageFile, img); err != nil {
 		fmt.Printf("Error writing image file: %v", err)
 		os.Exit(1)
 
-	} // for now, always create a new file instead of overwriting.
-	fmt.Print("Output written to file new.png")
+	}
+	fmt.Printf("Output written to file %s", imageFile)
 }

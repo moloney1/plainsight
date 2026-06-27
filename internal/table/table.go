@@ -12,8 +12,8 @@ import (
 	"github.com/moloney1/plainsight/internal/constants"
 )
 
-const metaSizeBytes = 512
-const bucketSizeBytes = 1024
+const metaSizeBytes = 2048
+const bucketSizeBytes = 4096
 
 const openCurlyBrace = 123
 const closeCurlyBrace = 125
@@ -216,8 +216,6 @@ func (t *Table) calculateIndex(key string, capacity int) int {
 	for idx%8 != 0 {
 		idx += 1
 	}
-
-	fmt.Printf("Index: %d\n", idx)
 
 	return idx
 }

@@ -2,7 +2,6 @@
 package table
 
 import (
-	"fmt"
 	"slices"
 	"testing"
 
@@ -10,6 +9,7 @@ import (
 )
 
 const mockIndex = 552
+const testSliceSize = metaSizeBytes + 2*bucketSizeBytes
 
 type MockHasher struct{}
 
@@ -21,7 +21,7 @@ func (m MockHasher) BlockSize() int              { return 0 }
 func (m MockHasher) Sum64() uint64               { return mockIndex }
 
 func TestNewTablePositive(t *testing.T) {
-	bytes := make([]byte, 1000)
+	bytes := make([]byte, testSliceSize)
 	_, err := NewTable(bytes, MockHasher{})
 	if err != nil {
 		t.Errorf("unexpected error %v", err)
@@ -38,7 +38,7 @@ func TestNewTableNegative(t *testing.T) {
 
 func TestTableFromBytesPositive(t *testing.T) {
 	metadataJson := "{\"cap\":1234,\"size\":1,\"keys\":[\"someKey\"]}"
-	bytes := make([]byte, 1000)
+	bytes := make([]byte, testSliceSize)
 	bytes, _ = codec.WriteMessage(metadataJson, bytes, 0)
 
 	_, err := TableFromBytes(bytes, MockHasher{})
@@ -56,24 +56,26 @@ func TestTableFromBytesNegative(t *testing.T) {
 		dataToWrite string
 	}{
 		{"TestTableFromBytesN1", nonsense},
-		{"TestTableFromBytesN1", notQuiteJson},
+		{"TestTableFromBytesN2", notQuiteJson},
 	}
 
 	for _, tc := range tests {
-		bytes := make([]byte, 1000)
-		bytes, _ = codec.WriteMessage(tc.dataToWrite, bytes, 0)
-		_, err := TableFromBytes(bytes, MockHasher{})
-		if err == nil {
-			t.Errorf("expected error")
-		}
-		fmt.Println(err)
+		t.Run(tc.name, func(t *testing.T) {
+			bytes := make([]byte, testSliceSize)
+			bytes, _ = codec.WriteMessage(tc.dataToWrite, bytes, 0)
+			_, err := TableFromBytes(bytes, MockHasher{})
+			if err == nil {
+				t.Errorf("expected error")
+			}
+			t.Log(err)
+		})
 	}
 }
 
 func TestReadPositive(t *testing.T) {
 	metadataJson := "{\"cap\":1234,\"size\":1,\"keys\":[\"someKey\"]}"
 	entryJson := "{\"user\":\"yourName\",\"pass\":\"hunter2\"}"
-	bytes := make([]byte, 2000)
+	bytes := make([]byte, testSliceSize)
 	bytes, _ = codec.WriteMessage(metadataJson, bytes, 0)
 	bytes, _ = codec.WriteMessage(entryJson, bytes, mockIndex)
 
@@ -102,24 +104,26 @@ func TestReadNegative(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		bytes := make([]byte, 2000)
-		bytes, _ = codec.WriteMessage(tc.metadataToWrite, bytes, 0)
-		bytes, _ = codec.WriteMessage(tc.dataToWrite, bytes, mockIndex) // to match what the MockHasher returns
+		t.Run(tc.name, func(t *testing.T) {
+			bytes := make([]byte, testSliceSize)
+			bytes, _ = codec.WriteMessage(tc.metadataToWrite, bytes, 0)
+			bytes, _ = codec.WriteMessage(tc.dataToWrite, bytes, mockIndex) // to match what the MockHasher returns
 
-		table, err := TableFromBytes(bytes, MockHasher{})
-		if err != nil {
-			t.Fatalf("failed to create table from test data: %v", err)
-		}
+			table, err := TableFromBytes(bytes, MockHasher{})
+			if err != nil {
+				t.Fatalf("failed to create table from test data: %v", err)
+			}
 
-		_, err = table.Read("someKey")
-		if err == nil {
-			t.Errorf("expected error")
-		}
+			_, err = table.Read("someKey")
+			if err == nil {
+				t.Errorf("expected error")
+			}
+		})
 	}
 }
 
 func TestAddPositive(t *testing.T) {
-	table, err := NewTable(make([]byte, 2000), MockHasher{})
+	table, err := NewTable(make([]byte, testSliceSize), MockHasher{})
 	if err != nil {
 		t.Fatalf("error creating new table: %v", err)
 	}
@@ -127,17 +131,17 @@ func TestAddPositive(t *testing.T) {
 		t.Errorf("unexpected error: %v", err)
 	}
 	addedToMetaKeys := slices.Contains(table.Meta.Keys, "someKey")
-	if addedToMetaKeys != true {
+	if !addedToMetaKeys {
 		t.Error("expected someKey to be added to table metadata.Keys")
 	}
 }
 
 func TestAddNegative(t *testing.T) {
-	table, err := NewTable(make([]byte, 2000), MockHasher{})
+	table, err := NewTable(make([]byte, testSliceSize), MockHasher{})
 	if err != nil {
 		t.Fatalf("error creating new table: %v", err)
 	}
-	longKey := "this-key-is-long-enough-to-overflow-the-metadata-section"
+	longKey := "this-key-is-long-enough-to-overflow-the-metadata-section-this-key-is-long-enough-to-overflow-the-metadata-section-this-key-is-long-enough-to-overflow-the-metadata-section-this-key-is-long-enough-to-overflow-the-metadata-section-this-key-is-long-enough-to-overflow-the-metadata-section-this-key-is-long-enough-to-overflow-the-metadata-section-this-key-is-long-enough-to-overflow-the-metadata-section-this-key-is-long-enough-to-overflow-the-metadata-section-"
 	if err = table.Add(longKey, "someValue"); err == nil {
 		t.Error("expected error when metadata section overflows")
 	}
@@ -146,12 +150,11 @@ func TestAddNegative(t *testing.T) {
 func TestDeletePositive(t *testing.T) {
 	metadataJson := "{\"cap\":1234,\"size\":1,\"keys\":[\"someKey\"]}"
 	entryJson := "{\"user\":\"yourName\",\"pass\":\"hunter2\"}"
-	bytes := make([]byte, 2000)
+	bytes := make([]byte, testSliceSize)
 	bytes, _ = codec.WriteMessage(metadataJson, bytes, 0)
 	bytes, _ = codec.WriteMessage(entryJson, bytes, mockIndex)
 
 	tbl, _ := TableFromBytes(bytes, MockHasher{})
-	// fmt.Println(tbl)
 
 	sizeBefore := tbl.Meta.Size
 
